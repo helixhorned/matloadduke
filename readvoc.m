@@ -2,10 +2,12 @@
 % [META,SND] = READVOC(FILENAME [, NOCONVERT])  Read Creative Voice VOC file.
 %
 % By default, samples are converted to double precision and normalized such
-% that a value of 1.0 corresponds to the maximum possible amplitude in the
-% original sample format.
-% If optional second argument NOCONVERT is true, do not carry out this conversion.
-% SND is a matrix with #samples rows and #channels columns.
+%  that a value of 1.0 corresponds to the maximum possible amplitude in the
+%  original sample format.
+% If optional second argument NOCONVERT is true, do not carry out this
+%  conversion.  SND is a matrix with #samples rows and #channels columns. It
+%  has type double if normalization was requested, else it has type int32 for
+%  8-bit or int16 for 16-bit PCM data.
 %
 % META = READVOC(FILENAME)  returns only the metadata of the VOC file.
 %
@@ -145,6 +147,7 @@ while (1)
             if (~strcmp(class(ccid),class(codecid)) || ccid~=codecid || fdiv~=freqdiv || 1~=meta.numchan)
                 meta.error = 6;
                 meta.errstr = 'Multiple formats in one file not supported.';
+                snd = uint8([]);
                 return
             end
         else
@@ -191,6 +194,7 @@ while (1)
             if (~strcmp(class(ccid),class(codecid)) || ccid~=codecid || fdiv~=freqdiv || nc~=meta.numchan)
                 meta.error = 6;
                 meta.errstr = 'Multiple formats in one file not supported.';
+                snd = uint8([]);
                 return
             end
         else
@@ -226,6 +230,7 @@ while (1)
             if (~strcmp(class(ccid),class(codecid)) || ccid~=codecid || fs~=meta.fs || nc~=meta.numchan)
                 meta.error = 6;
                 meta.errstr = 'Multiple formats in one file not supported.';
+                snd = uint8([]);
                 return
             end
         else
@@ -266,17 +271,15 @@ meta.blockcnt_ = blockcnt;
 if (nargout > 1)
     % Possibly convert samples
     if (codecid == 4)  % 16 bit signed PCM
-        snd16 = zeros(numel(snd)/2, 1, 'int32');
-        for i=1:numel(snd)/2
-            snd16(i) = btoi(snd(2*i-1 : 2*i));
-        end
-        snd = snd16;
+        uisnd = uint16(snd);
+        snd = typecast(uisnd(1:2:end) + bitshift(uisnd(2:2:end), 8), 'int16');
     elseif (codecid == 0)  % 8 bit unsigned PCM
         snd = int32(snd)-int32(128);
     else
         if (~noconvert)
             meta.error = 8;
             meta.errstr = 'Sample format not supported.';
+            snd = uint8([]);
         end
     end
 
@@ -292,8 +295,8 @@ if (nargout > 1)
 
     % Possibly reshape if we have more than one channel
     if (meta.numchan>1)
-        % Unpack samples. Result is a (#samples, #channels) matrix
-        snd = reshape(snd, meta.numchan, []).';
+        % Result is a (#samples, #channels) matrix
+        snd = reshape(snd, [], meta.numchan);
     end
 end
 
