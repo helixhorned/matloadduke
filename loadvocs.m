@@ -31,6 +31,10 @@ for i=1:numfiles
         fn = deblank(files(i,:));
     end
 
+    if (isempty(fn))
+        continue;
+    end
+
     if (loadsounds)
         [metas(i), sounds{i}] = readvoc(fn, noconvert);
     else
