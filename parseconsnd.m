@@ -25,7 +25,7 @@
 %  - comments aren't parsed in the CON files
 %  - if loading in define number order, sound #0 (KICK_HIT in Duke3D) will not
 %    be loaded since we keep the original numbers and MATLAB/Octave indexes
-%    starting with 1
+%    start with 1
 function sounds=parseconsnd(user_filename, defs_filename)
 
 sounds = struct();

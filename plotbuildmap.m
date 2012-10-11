@@ -20,13 +20,11 @@ if (nargin<3)
     drawceil = false;
 end
 
-isoctave = ~isempty(ver('Octave'));
-
 if (~have_axes)
-    if (isoctave)
+    try OCTAVE_VERSION
         plot3([0 0], [0 0], [0 0]);
         ax = gca;
-    else
+    catch
         ax = axes();
     end
 end
