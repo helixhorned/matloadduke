@@ -19,6 +19,7 @@
 %             0 (8-bit unsigned PCM) and 4 (16-bit signed PCM)
 %   .numchan:  number of channels
 %   .version:  VOC file version, numeric pair [major minor]
+%   .terminator:  true if the VOC file has a terminator ()
 %   .error:  a numeric value greater 0 if an error occurred
 %   (.errorstr:  a string describing it in that case)
 function [meta,snd]=readvoc(filename, noconvert)
@@ -28,10 +29,13 @@ meta.fs = 0;  % sampling rate
 meta.format = 0;  % sample format ("codec id")
 meta.numchan = 0;  % number of channels
 meta.version = uint8([0 0]);  % [major minor]
+meta.terminator = false;
+meta.corrupt = 0;
 meta.error = 0;  % whether an error occurred
 meta.errorstr = '';  % a string desribing it
 
 meta.blockcnt_ = zeros(1,9);
+meta.text = {};
 
 blockcnt = zeros(1,9);
 
@@ -120,6 +124,15 @@ freqdiv = uint8(0);  % frequency divisor
 % loop over blocks
 while (1)
     if (b+4 > length(data))  % this would skip a trailing terminator but so what...
+        if (b > length(data))
+            meta.corrupt = 1;
+        else
+            if (b+1 <= length(data) && data(b+1)==0)
+                meta.terminator = true;
+            else
+                meta.terminator = false;
+            end
+        end
         break
     end
 
@@ -129,6 +142,7 @@ while (1)
 
     switch blocktype
       case 0,  % terminator (not mandatory)
+        meta.terminator = true;
         break  % the while loop
 
       case 1,
@@ -172,10 +186,15 @@ while (1)
 
          snd = [snd; data(b+3:b+blocksize)];
 
-      case {3,4,5,6,7},
-        % silence, marker, text, repeat start & end
+      case {3,4,6,7},
+        % silence, marker, repeat start & end
         % not implemented
-        
+
+      case 5,
+        % Block type 0x05: Text
+        % bytes 0..n   zero terminated string
+        meta.text{end+1} = char(data(b:b+blocksize-1).');
+
       case 8,
         % Block type 0x08: Extra info
         % 
