@@ -49,10 +49,13 @@ end
 
 fid = fopen(filename);
 
-if (fid<0)
-    meta.error = 1;
-    meta.errorstr = 'Couldn''t open file.';
-    return
+if (fid < 0)
+    fid = fopen(upper(filename));
+    if (fid < 0)
+        meta.error = 1;
+        meta.errorstr = 'Couldn''t open file.';
+        return
+    end
 end
 
 % from http://wiki.multimedia.cx/index.php?title=Creative_Voice:
