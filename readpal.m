@@ -1,8 +1,11 @@
-% PAL=READPAL(FILENAME [, CLAMPNORM])  Reads a BUILD palette file (which is a linear dump
+% [PAL, SHTAB]=READPAL(FILENAME [, CLAMPNORM])  Reads a BUILD palette file (which is a linear dump
 %  of RBG values as bytes) and return a palette usable for colormap() etc.
 % If optional argument CLAMPNORM is true, normalize the maximal value to 1.0.
+%
+% SHTAB: base shade table, 256-by-32 uint8. Only if FILENAME is file name.
+%
 % PAL=READPAL(DATA, ...) where DATA is of type uint8...
-function pal=readpal(filename, clampnorm)
+function [pal, shtab] = readpal(filename, clampnorm)
 
     pal = zeros(0,3);
 
@@ -28,7 +31,26 @@ function pal=readpal(filename, clampnorm)
 
     pal = reshape(data, 3,256).'/255;
 
+    shtab = [];
     if (ischar(filename))
+        [numshades, cnt] = fread(fid, 1, 'int16');
+        if (cnt ~= 2)
+            fclose(fid);
+            error('Couldn''t read 2 bytes from file.');
+        end
+        if (numshades ~= 32)
+            fclose(fid);
+            error('Shade tables with !=32 number of shades unsupported');
+        end
+
+        [shtab, cnt] = fread(fid, 32*256, 'uint8=>double');
+        if (cnt ~= 32*256)
+            fclose(fid);
+            error('Couldn''t read shade table from file.');
+        end
+
+        shtab = reshape(shtab, 256, 32);
+
         fclose(fid);
     end
 
