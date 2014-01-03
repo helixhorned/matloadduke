@@ -13,7 +13,7 @@ function [pal, shtab] = readpal(filename, clampnorm)
         fid = fopen(filename);
 
         if (fid<0)
-            error(sprintf('Couldn''t read `%s''.', ferror(fid)));
+            error(sprintf('Couldn''t open `%s''.', filename));
             return
         end
 
@@ -32,7 +32,7 @@ function [pal, shtab] = readpal(filename, clampnorm)
     pal = reshape(data, 3,256).'/255;
 
     shtab = [];
-    if (ischar(filename))
+    if (nargout >= 2 && ischar(filename))
         [numshades, cnt] = fread(fid, 1, 'int16');
         if (cnt ~= 2)
             fclose(fid);
