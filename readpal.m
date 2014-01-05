@@ -34,7 +34,7 @@ function [pal, shtab] = readpal(filename, clampnorm)
     shtab = [];
     if (nargout >= 2 && ischar(filename))
         [numshades, cnt] = fread(fid, 1, 'int16');
-        if (cnt ~= 2)
+        if (cnt ~= 1)
             fclose(fid);
             error('Couldn''t read 2 bytes from file.');
         end

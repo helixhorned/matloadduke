@@ -21,24 +21,22 @@ function [s,gpicanm]=readart(filename, s, gpicanm)
     if (read_file)
         [fid,msg]=fopen(filename);
 
-        if fid<0
+        if (fid < 0)
             warning(msg);
             return
         end
 
         [data,cnt] = fread(fid, 4, 'int32');
         if (cnt ~= 4)
-            warning(ferror(fid));
+            warning('couldn''t read four 32-bit ints');
             fclose(fid);
             return
         end
 
         artversion = data(1);
-    
-    elseif(strcmp(class(filename), 'uint8'))
+    elseif (strcmp(class(filename), 'uint8'))
         data = filename(:).';  % row vector
         artversion = double(getint4(data(1:4)));
-
     else
         error('First argument must be either file name (char) of data (uint8).');
     end
@@ -85,7 +83,7 @@ function [s,gpicanm]=readart(filename, s, gpicanm)
         ofs = ofs+len;
     end
 
-    if nargin>=3 && nargout>=2
+    if (nargin>=3 && nargout>=2)
         gpicanm(localtilestart+1 : localtilestart+localnumtiles) = picanm;
     end
 
