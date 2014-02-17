@@ -38,18 +38,18 @@ function [pal, shtab] = readpal(filename, clampnorm)
             fclose(fid);
             error('Couldn''t read 2 bytes from file.');
         end
-        if (numshades ~= 32)
+        if (~(numshades >= 1 && numshades <= 256))
             fclose(fid);
-            error('Shade tables with !=32 number of shades unsupported');
+            error(['Invalid number of shades: ' num2str(numshades)]);
         end
 
-        [shtab, cnt] = fread(fid, 32*256, 'uint8=>double');
-        if (cnt ~= 32*256)
+        [shtab, cnt] = fread(fid, numshades*256, 'uint8=>double');
+        if (cnt ~= numshades*256)
             fclose(fid);
             error('Couldn''t read shade table from file.');
         end
 
-        shtab = reshape(shtab, 256, 32);
+        shtab = reshape(shtab, 256, numshades);
 
         fclose(fid);
     end

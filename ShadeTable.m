@@ -1,8 +1,10 @@
 classdef ShadeTable < handle
     properties
-        % The shade table, (256 x 32)
+        numshades
+
+        % The shade table, (256 x numshades)
         sht
-        % The same thing, arranged in a square (16 x 16 x 32)
+        % The same thing, arranged in a square (16 x 16 x numshades)
         shtsq
 
         % The base palette (256 x 3), range [0 .. 1]
@@ -19,6 +21,8 @@ classdef ShadeTable < handle
         function self = ShadeTable(filename, perm16)
             [self.pal, self.sht] = readpal(filename, true);
 
+            self.numshades = size(self.sht, 2);
+
             if (nargin >= 2)
                 assert(isvector(perm16) && numel(perm16)==16 && isequal(sort(perm16), 0:15), ...
                        'PERM16 must be a permutation of 0:15');
@@ -34,7 +38,7 @@ classdef ShadeTable < handle
                 self.perm = idxs;
             end
 
-            self.shtsq = reshape(self.sht, 16, 16, 32);
+            self.shtsq = reshape(self.sht, 16, 16, self.numshades);
             self.palsq = reshape(self.pal, 16, 16, 3);
         end
 
@@ -99,20 +103,21 @@ classdef ShadeTable < handle
             g = pg(cidxs+1);
             b = pb(cidxs+1);
 
-            ii = 0:31;
+            nsh = self.numshades;
+            ii = 0:nsh;
 
             hold off;
             plot(ii, r, 'r.-');
             hold on;
-            plot([0 31], [r(1) 0], 'r:');
+            plot([0 nsh], [r(1) 0], 'r:');
 
             plot(ii, g, 'g.-');
             plot(ii, b, 'b.-');
 
-            plot([0 31], [g(1) 0], 'color',[0 .6 0], 'linestyle',':');
-            plot([0 31], [b(1) 0], 'b:');
+            plot([0 nsh], [g(1) 0], 'color',[0 .6 0], 'linestyle',':');
+            plot([0 nsh], [b(1) 0], 'b:');
 
-            set(gca, 'xlim', [0 31]);
+            set(gca, 'xlim', [0 nsh]);
 
             legend('actual', 'expected (linear ramp)');
 
