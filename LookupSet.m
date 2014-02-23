@@ -38,6 +38,27 @@ classdef LookupSet < handle
             fclose(fid);
         end
 
+        function compare(self, other)
+            assert(isa(other, 'LookupSet'), 'OTHER must be a LookupSet object handle');
+
+            numour = numel(self.lookups);
+            numtheir = numel(other.lookups);
+
+            for i=1:min(numour, numtheir)
+                lookup1 = self.lookups{i};
+                lookup2 = other.lookups{i};
+
+                if (isempty(lookup1) ~= isempty(lookup2))
+                    fprintf('%d: one has, other doesn''t\n', i);
+                    continue
+                end
+
+                if (~isequal(lookup1, lookup2))
+                    fprintf('%d: %d color indices differ\n', i, sum(lookup1(:) ~= lookup2(:)));
+                end
+            end
+        end
+
         function printRemap16(self)
             for i=1:numel(self.lookups)
                 remaptab = self.lookups{i};
