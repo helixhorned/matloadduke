@@ -2,6 +2,8 @@ classdef LookupSet < handle
     properties
         % Cell array of 256-vectors
         lookups
+
+        palnumord
     end
 
     methods
@@ -19,16 +21,19 @@ classdef LookupSet < handle
                 error('Couln''t read one byte from file.');
             end
 
+            self.palnumord = zeros(1, numlookups);
             self.lookups = cell(1, numlookups);
 
             for i=1:numlookups
                 [palnum, cnt] = fread(fid, 1, 'uint8');
+                self.palnumord(i) = palnum;
+
                 if (cnt ~= 1)
                     fclose(fid);
                     error('Couln''t read one byte from file.');
                 end
 
-                [self.lookups{palnum}, cnt] = fread(fid, 256, 'uint8');
+                [self.lookups{palnum+1}, cnt] = fread(fid, 256, 'uint8');
                 if (cnt ~= 256)
                     fclose(fid);
                     error('Couln''t read lookup #d from file.');
@@ -76,9 +81,9 @@ classdef LookupSet < handle
                     % NOTE: I'm calling 16-tuples (sexdecatuples?) 'hexs' for brevity.
 
                     if (isequal(cmptab, remaptab))
-                        fprintf('%2d:  { ', i);
+                        fprintf('%2d:  { ', i-1);
                     else
-                        fprintf('%2d*: { ', i);
+                        fprintf('%2d*: { ', i-1);
                     end
 
                     for j=1:16
