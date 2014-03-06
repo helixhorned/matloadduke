@@ -42,6 +42,31 @@ classdef ShadeTable < handle
             self.palsq = reshape(self.pal, 16, 16, 3);
         end
 
+        % .plotShadeTable(NAME)
+        %
+        % NAME: a descriptive name of the PALETTE.DAT file, like 'Original Duke3D 1.5'.
+        function plotShadeTable(self, name)
+            if (nargin < 1)
+                name = 'Unknown';
+            end
+
+            im = image(self.sht(1:240, :)+1);
+            colormap(self.pal);
+            set(im, 'CDataMapping', 'direct');
+
+            set(gca, 'xtick', 1:5:32, 'xticklabel', 0:5:31);
+            set(gca, 'ytick', 1:16:240, 'yticklabel', 0:16:239);
+
+            xlabel('shade index');
+            if (~isempty(self.perm))  % XXX: perm may be the identity permutation
+                ylabel('rearranged color index');
+            else
+                ylabel('color index');
+            end
+
+            title(sprintf('%s shade table', name));
+        end
+
         % figure('position', [100 100, 1200 150])
         % print('basepal0_rgb.png', '-dpng', '-S1200,150')
         function plotPalRGB(self, gaps, dots)
