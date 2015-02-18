@@ -1,7 +1,7 @@
 
-  Duke Nukem 3d file format importers for MATLAB/Octave
+  Duke Nukem 3D file format importers for MATLAB/Octave
   -----------------------------------------------------
-              (C) 2010, 2012 Philipp Kutin
+              (C) 2010--2015 Philipp Kutin
 
 This package includes routines for importing data from Duke Nukem 3D and other
 format-compatible BUILD games into MATLAB or Octave. The following formats are
@@ -36,3 +36,6 @@ Changelog:
 2012-01-23:
  - added parseconsnd.m for parsing sound definitions from CON
  - faster loading of VOC files
+
+2015-02-18:
+ - added and updated dukecon-mode.el and m32script-mode.el

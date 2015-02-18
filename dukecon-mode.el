@@ -2,10 +2,10 @@
 
 ;; Author: Philipp Kutin, based on a tutorial by Scott Andrew Borton
 ;; Created: 01 Sep 2007
-;; Last updated: 11 Oct 2012
+;; Last updated: 18 Feb 2015
 ;; Keywords: Duke3D Eduke32 con major-mode
 
-;; Copyright (C) 2007-2012 Philipp Kutin
+;; Copyright (C) 2007-2015 Philipp Kutin
 ;; Copyright (C) 2000, 2003 Scott Andrew Borton
 
 ;; This program is free software; you can redistribute it and/or
@@ -78,7 +78,7 @@ ifawayfromwall ifbulletnear ifcansee ifcanseetarget
 ifcanshoottarget ifceilingdistl ifclient ifcount ifdead iffloordistl
 ifgapzl ifgotweaponce ifhitspace ifhitweapon ifinouterspace
 ifinspace ifinwater ifmove ifmultiplayer ifnosounds ifnotmoving
-ifonwater ifoutside ifp ifpdistg ifpdistl ifphealthl ifpinventory
+ifonwater ifoutside ifp ifpdistg ifpdistl ifphealthl ifpinventory ifplayersl
 ifrespawn ifrnd ifserver ifsound ifspawnedby ifspritepal ifsquished
 ifstrength ifvarand ifvare ifvareither ifvarg ifvarl ifvarn
 ifvaror ifvarvarand ifvarvare ifvarvareither ifvarvarg ifvarvarl
@@ -86,7 +86,7 @@ ifvarvarn ifvarvaror ifvarvarxor ifvarxor ifwasweapon return switch
 whilevarn whilevarvarn ))
 
 (defconst dukecon-keywords-3
-  '( action activatebysector activatecheat addammo addinventory
+  '( action activate activatebysector activatecheat addammo addinventory
 addkills addlog addlogvar addphealth addstrength addvar addvarvar
 addweapon addweaponvar ai andvar andvarvar angoff angoffvar
 betaname cactor calchypotenuse cansee canseespr changespritesect
@@ -96,7 +96,7 @@ cstator debris debug define definecheat definegamefuncname
 definegametype definelevelname defineprojectile definequote
 defineskillname definesound definevolumename digitalnumber
 digitalnumberz displayrand displayrandvar displayrandvarvar dist
-divvar divvarvar dragpoint dynamicremap echo endofgame
+divvar divvarvar dragpoint dynamicsoundremap dynamicremap echo endofgame endoflevel
 enhanced eqspawn eqspawnvar eshoot eshootvar espawn espawnvar
 ezshoot ezshootvar fall findnearactor findnearactor3d
 findnearactor3dvar findnearactorvar findnearactorz
@@ -106,7 +106,7 @@ findnearspritezvar findotherplayer findplayer flash gamearray
 gamestartup gametext gametextz gamevar getactor getactorangle
 getactorvar getangle getangletotarget getarraysize
 getceilzofslope getcurraddress getflorzofslope getincangle
-getinput getkeyname getlastpal getplayer getplayerangle
+getinput getkeyname getlastpal getmusicposition getplayer getplayerangle
 getplayervar getpname getprojectile getsector gettextureceiling
 gettexturefloor getthisprojectile getticks gettimedate gettspr
 getuserdef getwall getzrange globalsound globalsoundvar gmaxammo
@@ -119,23 +119,23 @@ nextspritestat nullop operate operateactivators
 operatemasterswitches operaterespawns operatesectors orvar
 orvarvar palfrom paper pkick precache prevspritesect
 prevspritestat pstomp qgetsysstr qspawn qspawnvar qsprintf
-qstrcat qstrcpy qstrncat qstrlen qsubstr quake quote randvar randvarvar
+qstrcat qstrcpy qstrdim qstrncat qstrlen qsubstr quake quote randvar randvarvar
 rayintersect readarrayfromfile readgamevar redefinequote resetactioncount
 resetcount resetplayer resizearray respawnhitag rotatepoint
-rotatesprite rotatesprite16 save savegamevar savemapstate savenn
-scriptsize sectclearinterpolation sectgethitag sectgetlotag
+rotatesprite rotatespritea rotatesprite16 save savegamevar savemapstate savenn
+screentext screensound scriptsize sectclearinterpolation sectgethitag sectgetlotag
 sectorofwall sectsetinterpolation setactor setactorangle setactorsoundpitch
 setactorvar setarray setaspect setcfgname setdefname setgamename
-setgamepalette setinput setplayer setplayerangle setplayervar
+setgamepalette setinput setmusicposition setplayer setplayerangle setplayervar
 setprojectile setsector setsprite setthisprojectile settspr
-setuserdef setvar setvarvar setwall shiftvarl shiftvarr shoot
+setuserdef setvar setvarvar setwall shadeto shiftvarl shiftvarr shoot
 shootvar showview showviewunbiased sin sizeat sizeto sleeptime smaxammo sound
 soundonce soundoncevar soundvar spawn spgethitag spgetlotag
 spriteflags spritenopal spritenoshade spritenvg spritepal
 spriteshadow sqrt ssp startlevel starttrack starttrackvar
 stopactorsound
 stopallsounds stopsound stopsoundvar strength subvar subvarvar
-time tip tossweapon updatesector updatesectorz userquote
+time tip tossweapon undefinelevel undefineskill undefinevolume updatesector updatesectorz userquote
 wackplayer writearraytofile xorvar xorvarvar zshoot zshootvar ))
 
 
@@ -328,52 +328,48 @@ wackplayer writearraytofile xorvar xorvarvar zshoot zshootvar ))
 
 (defconst dukecon-eldoc-string-list 
   `(
-; TODO: ...
+    ("activate" "activate <lotag>\n(Pre-1.3D)")
 	("activatecheat" "activatecheat <cheat number>")
     ("calchypotenuse" "calchypotenuse <<ret>> <x> <y>")
-	("clearmapstate" "clearmapstate ")
-	("cmenu" "cmenu ")
+	("clearmapstate" "clearmapstate <level>")
+	("cmenu" "cmenu <value>")
     ("clipmove" "clipmove <<ret>> <<x>> <<y>> <z> <<sectnum>> <xvect> <yvect> <walldist> <floordist> <ceildist> <clipmask>")
     ("clipmovenoslide" "clipmovenoslide <<ret>> <<x>> <<y>> <z> <<sectnum>> <xvect> <yvect> <walldist> <floordist> <ceildist> <clipmask>")
 	("digitalnumberz" "digitalnumberz <tilenum> <x> <y> <number> <shade> <pal> <orientation> <x1> <y1> <x2> <y2> <digitalscale> ")
-	("gamearray" "gamearray ")
-	("gametextz" "gametextz ")
-	("getarraysize" "getarraysize ")
-	("getkeyname" "getkeyname ")
-	("getticks" "getticks ")
-	("gettimedate" "gettimedate ")
-	("gettspr" "gettspr ")
-	("headspritesect" "headspritesect ")
-	("headspritestat" "headspritestat ")
-	("hitradiusvar" "hitradiusvar ")
-	("inittimer" "inittimer ")
-	("loadmapstate" "loadmapstate ")
+	("gamearray" "gamearray <name> <size>")
+	("getarraysize" "getarraysize <array name> <<return>>")
+    ("getceilzofslope" "getceilzofslope <sectnum> <x> <y> <<return>>")
+    ("getflorzofslope" "getflorzofslope <sectnum> <x> <y> <<return>>")
+	("getkeyname" "getkeyname <quoteID> <funcID> <key>")
+	("getticks" "getticks <<return>>")
+	("gettimedate" "gettimedate <<sec>> <<min>> <<hour>> <<mday>> <<mon>> <<year>> <<wday>> <<yday>>")
+;	("gettspr" "gettspr ")
+	("headspritesect" "headspritesect <<sprite>> <sectnum>")
+	("headspritestat" "headspritestat <<sprite>> <statenum>")
+	("inittimer" "inittimer <rate>")
     ("lineintersect" "lineintersect  <x1> <y1> <z1>  <x2> <y2> <z2>  <x3> <y3>  <x4> <y4>  <<intx>> <<inty>> <<intz>> <<ret>>")
-	("nextspritesect" "nextspritesect ")
-	("nextspritestat" "nextspritestat ")
-	("prevspritesect" "prevspritesect ")
-	("prevspritestat" "prevspritestat ")
-	("qgetsysstr" "qgetsysstr ")
-	("qsubstr" "qsubstr ")
+	("nextspritesect" "nextspritesect <<next>> <current>")
+	("nextspritestat" "nextspritestat <<next>> <current>")
+	("prevspritesect" "prevspritesect <<prev>> <current>")
+	("prevspritestat" "prevspritestat <<prev>> <current>")
+	("qgetsysstr" "qgetsysstr <<quoteID>> <strID>")
+	("qsubstr" "qsubstr <<destQuote>> <srcQuote> <start> <length>")
+    ("qsprintf" "qsprintf <<destQuote>> <formatQuote> [args...]")
     ("rayintersect" "rayintersect <x1> <y1> <z1>  <xv> <yv> <zv>  <x3> <y3>  <x4> <y4>  <<intx>> <<inty>> <<intz>> <<ret>>")
-	("readarrayfromfile" "readarrayfromfile ")
-	("resizearray" "resizearray ")
-	("rotatesprite16" "rotatesprite16 ")
-	("savemapstate" "savemapstate ")
-	("savenn" "savenn ")
-	("scriptsize" "scriptsize ")
+	("readarrayfromfile" "readarrayfromfile <array name> <quote number>")
+	("resizearray" "resizearray <array name> <new size>")
+	("scriptsize" "scriptsize <size>")
     ("sectsetinterpolation", "sectsetinterpolation <sector>")
     ("sectclearinterpolation", "sectclearinterpolation <sector>")
-	("setarray" "setarray ")
-	("setcfgname" "setcfgname ")
-	("setdefname" "setdefname ")
-	("setgamename" "setgamename ")
-	("setgamepalette" "setgamepalette ")
-	("settspr" "settspr ")
-	("spritenopal" "spritenopal ")
-	("starttrackvar" "starttrackvar ")
-	("time" "time ")
-	("writearraytofile" "writearraytofile ")
+	("setarray" "setarray <gamearray>[<index>] <gamevar>")
+	("setcfgname" "setcfgname <filename>")
+	("setdefname" "setdefname <filename>")
+	("setgamename" "setgamename <name>")
+	("setgamepalette" "setgamepalette <basePalIdx>")
+;	("settspr" "settspr ")
+	("spritenopal" "spritenopal <tilenum>")
+	("time" "time <gamevar>\n(No-op)")
+	("writearraytofile" "writearraytofile <array name> <quote number>")
 
 	("action" "action <name> <startframe> <frames> <viewtype> <incvalue> <delay>")
 	("action" "action <name>")
@@ -427,6 +423,7 @@ wackplayer writearraytofile xorvar xorvarvar zshoot zshootvar ))
 	("dragpoint" "dragpoint <wallnum> <x> <y>")
     ("echo" "echo <quote>")
 	("endofgame" "endofgame <number>")
+	("endoflevel" "endoflevel <number>\n(Pre-1.3D)")
 	("enhanced" "enhanced <value>")
 	("eqspawn" "eqspawn <actor>")
 	("eqspawnvar" "eqspawnvar <gamevar>")
@@ -440,14 +437,20 @@ wackplayer writearraytofile xorvar xorvarvar zshoot zshootvar ))
 	("findnearactorz" "findnearactorz <actor> <xydistance> <zdistance> <gamevar>")
 	("gametext" ,(concat "gametext <tilenum> <x> <y> <quote> <shade> <pal> <orientation> <x1> <y1> <x2> <y2>"
 						dukecon-eldoc-orientation-string))
-	("getangle" "getangle <x> <y>")
+	("gametextz" ,(concat "gametextz <tilenum> <x> <y> <quote> <shade> <pal> <orientation> <x1> <y1> <x2> <y2> <textscale>"
+						dukecon-eldoc-orientation-string))
+	("getangle" "getangle <<return>> <x> <y>")
+    ("getangletotarget" "getangletotarget <<ang>>")
 	("getpname" "getpname <QUOTE #> <gamevar holding PLAYER ID>")
 	("getprojectile" "getprojectile[tilenum].parameter <gamevar>")
 	("getthisprojectile" "getthisprojectile[<sprite id>].parameter <gamevar>")
+    ("getmusicposition" "getmusicposition <<pos>>")
+    ("setmusicposition" "getmusicposition <pos>")
 	("globalsound" "globalsound <sound>")
 	("globalsoundvar" "globalsoundvar <gamevar>")
 	("guts" "guts <tilenum> <amount>")
 	("hitradius" "hitradius <radius> <1 (furthest)> <2> <3> <4 (closest)>")
+	("hitradiusvar" "hitradiusvar <radius> <1 (furthest)> <2> <3> <4 (closest)>")
 	("hitscan" "hitscan <x1> <y1> <z1> <sect1> <cos of ang> <sin of ang> <zvel> <hit sector return var> <hit wall return var> <hit sprite return var> <hit x return var> <hit y return var> <hit z return var> <clip mask>")
 	("ifaction" "ifaction <action> { do something } else { do something else }")
 	("ifactioncount" "ifactioncount <number> { do something } else { do something else }")
@@ -466,6 +469,7 @@ wackplayer writearraytofile xorvar xorvarvar zshoot zshootvar ))
 	("ifpdistl" "ifpdistl <number>")
 	("ifphealthl" "ifphealthl <number> { do something } else { do something else }")
 	("ifpinventory" "ifpinventory <inventory item> <value>")
+    ("ifplayersl" "ifplayersl <numplayers>\n(Pre-1.3D)")
 	("ifrnd" "ifrnd <value> { <do somethin!> }")
     ("ifserver" "ifserver { ... }")
 	("ifsound" "ifsound <sound> { code }")
@@ -492,6 +496,7 @@ wackplayer writearraytofile xorvar xorvarvar zshoot zshootvar ))
 	("include" "include <filename>")
 	("includedefault" "includedefault")
 	("ldist" "ldist <variable to return distance value to> <actor 1> <actor 2>")
+	("loadmapstate" "loadmapstate")
 	("lockplayer" "lockplayer <gamevar>")
 	("lotsofglass" "lotsofglass <number>")
 	("mail" "mail <number>")
@@ -507,6 +512,7 @@ wackplayer writearraytofile xorvar xorvarvar zshoot zshootvar ))
 					dukecon-eldoc-orientation-string))
 	("myospal" ,(concat "myospal <x> <y> <tilenum> <shade> <orientation> <pal>"
 					   dukecon-eldoc-orientation-string))
+    ("operateactivators" "operateactivators <lotag> <playerIdx>")
 	("operatesectors" "operatesectors <sector> <actor>")
 	("orvar" "orvar <gamevar> <value>")
 	("orvarvar" "orvarvar <gamevar1> <gamevar2>")
@@ -517,6 +523,7 @@ wackplayer writearraytofile xorvar xorvarvar zshoot zshootvar ))
 	("qspawnvar" "qspawnvar <gamevar>")
 	("qstrcat" "qstrcat <quote1> <quote2>")
 	("qstrcpy" "qstrcpy <quote1> <quote2>")
+    ("qstrdim" "qstrdim <<width>> <<height>> <tilenum> <x> <y> <zoom> <block angle> <quote> <orientation> <xspace> <yline> <xbetween> <ybetween> <text flags> <x1> <y1> <x2> <y2>")
 	("quote" "quote <quote number>")
 ;	("onevent" "onevent GETLOADTILE setvar RETURN <value> endevent")
 	("randvar" "randvar <gamevar> <value>")
@@ -524,15 +531,25 @@ wackplayer writearraytofile xorvar xorvarvar zshoot zshootvar ))
 	("readgamevar" "readgamevar <varname>")
 	("redefinequote" "redefinequote <quote number> <quote text>")
 	("rotatepoint" "rotatepoint <xpivot> <ypivot> <x> <y> <ang> <xreturnvar> <yreturnvar>")
-	("rotatesprite" ,(concat "rotatesprite <x> <y> <z> <a> <tilenum> <shade> <pal> <orientation> <x1> <x2> <y1> <y2>"
+	("rotatesprite" ,(concat "rotatesprite <x> <y> <zoom> <a> <tilenum> <shade> <pal> <orientation> <x1> <x2> <y1> <y2>"
 							dukecon-eldoc-orientation-string))
+	("rotatesprite16" ,(concat "rotatesprite16 <x> <y> <zoom> <a> <tilenum> <shade> <pal> <orientation> <x1> <x2> <y1> <y2>"
+							dukecon-eldoc-orientation-string))
+	("rotatespritea" ,(concat "rotatespritea <x> <y> <zoom> <a> <tilenum> <shade> <pal> <orientation> <alpha> <x1> <x2> <y1> <y2>"
+							dukecon-eldoc-orientation-string))
+	("save" "save <slot number>")
+	("savenn" "savenn <slot number>")
 	("savegamevar" "savegamevar <varname>")
+	("savemapstate" "savemapstate")
+    ("screentext" "screentext <tilenum> <x> <y> <zoom> <block angle> <character angle> <quote> <shade> <pal> <orientation> <alpha> <xspace> <yline> <xbetween> <ybetween> <text flags> <x1> <y1> <x2> <y2>")
+    ("screensound" "screensound <sound number>")
 	("setactorangle" "setactorangle <gamevar>")
 	("setplayerangle" "setplayerangle <gamevar>")
 	("setprojectile" "setprojectile[tilenum].parameter <gamevar>")
 	("setthisprojectile" "setthisprojectile[<sprite id>].parameter <gamevar>")
 	("setvar" "setvar <gamevar> <number>")
 	("setvarvar" "setvarvar <gamevar1> <gamevar2>")
+    ("shadeto" "shadeto <shade>\n(Pre-1.3D)")
 	("shiftvarl" "shiftvarl <gamevar> <number>")
 	("shiftvarr" "shiftvarr <gamevar> <number>")
 	("shoot" "shoot <tilenum>")
@@ -554,6 +571,7 @@ wackplayer writearraytofile xorvar xorvarvar zshoot zshootvar ))
 	("spriteshadow" "spriteshadow <tilenum>")
 	("startlevel" "startlevel <gamevar1> <gamevar2>")
 	("starttrack" "starttrack <track#>")
+	("starttrackvar" "starttrackvar <track#>")
 ;	("state" "state <name> { state code } ends")
 ;	("state" "state <name>")
 	("stopsound" "stopsound <sound number>")
@@ -561,8 +579,11 @@ wackplayer writearraytofile xorvar xorvarvar zshoot zshootvar ))
 	("strength" "strength <number>")
 	("subvar" "subvar <gamevar> <number>")
 	("subvarvar" "subvarvar <gamevar1> <gamevar2>")
-	("updatesector" "updatesector <x> <y> <gamevar>")
-	("updatesectorz" "updatesectorz <x> <y> <z> <gamevar>")
+	("updatesector" "updatesector <x> <y> <<gamevar>>")
+	("updatesectorz" "updatesectorz <x> <y> <z> <<gamevar>>")
+    ("undefinelevel <volume> <level>")
+    ("undefinevolume <volume>")
+    ("undefineskill <skill>")
 	("xorvar" "xorvar <gamevar> <number>")
 	("xorvarvar" "xorvarvar <gamevar1> <gamevar2>")
 	("zshoot" "zshoot <zvel> <projectile>")
